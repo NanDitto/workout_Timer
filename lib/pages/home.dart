@@ -20,39 +20,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Map getForm() {
-    Map data = ModalRoute.of(context).settings.arguments;
-    return data;
-  }
-
   Map data = {};
 
-  Workout test = Workout(
-      title: "Morning Workout",
-      numberExercises: 4,
-      durationExercise: 30,
-      rest: 15);
-
-  @override
-  void initState() {
-    super.initState();
+  void addToList(result) {
+    setState(() {
+      routines.add(
+        Workout(
+            title: result['name'],
+            numberExercises: result['exercises'],
+            durationExercise: result['duration'],
+            rest: result['rest']),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    //If there there is a return
-    try {
-      data = getForm();
-      routines.add(
-        Workout(
-            title: data['name'],
-            numberExercises: data['exercises'],
-            durationExercise: data['duration'],
-            rest: data['rest']),
-      );
-    } catch (e) {
-      print("Route not coming from Loading");
-    }
+    if (data == null) data = {};
+    data = data.isNotEmpty ? data : ModalRoute.of(context).settings.arguments;
     return Scaffold(
       backgroundColor: Colors.grey[300],
       appBar: AppBar(
@@ -68,8 +53,14 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: Builder(
         builder: (context) => FloatingActionButton(
           backgroundColor: Colors.deepOrange[400],
-          onPressed: () {
-            Navigator.pushNamed(context, '/form');
+          onPressed: () async {
+            dynamic result = await Navigator.pushNamed(context, '/form');
+            if (result != null) {
+              addToList(result);
+              print(result);
+            } else {
+              print("Nothing returned");
+            }
           },
           tooltip: 'Add New Workout',
           child: Icon(
