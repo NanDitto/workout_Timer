@@ -10,31 +10,62 @@ class TimerStart extends StatefulWidget {
 
 class _TimerState extends State<TimerStart> {
   Map data = {};
+  String title = "";
+  int numEx = 0;
+  int rest = 0;
+  int duration = 0;
+  int temp = 0;
+  Timer t;
+  bool isPaused = true;
+  bool isRest = false;
 
-  void startTimer(currentTime, duration) {
-    const oneSec = const Duration(seconds: 1);
-    currentTime = new Timer.periodic(
-      oneSec,
-      (currentTime) => setState(() {
-        if (duration < 1) {
-          currentTime.cancel();
+  void startTimer() {
+    if (t != null) {
+      t.cancel();
+    }
+    t = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        //TODO IF EXERCISE IS FINISHED MAYBE ADD A RESTART WORKOUT?
+        //TODO MAYBE ADD RESUME WORKOUT FROM ANOTHER PAGE?
+        //If the number of exercises is 4, then run the timer from the duration 4 times, and rest 3 times
+        if (!isPaused) {
+          if (temp > 0) {
+            temp--;
+          } else if (numEx > 0) {
+            numEx--;
+            isRest = isRest ? false : true;
+            if (isRest) {
+              temp = rest;
+            } else {
+              temp = duration;
+            }
+          } else {
+            t.cancel();
+          }
         } else {
-          duration = duration - 1;
-          print(duration);
+          print("Paused");
         }
-      }),
-    );
+      });
+    });
   }
 
-  bool isPaused = true;
+  @override
+  void dispose() {
+    if (t != null) t.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     data = ModalRoute.of(context).settings.arguments;
-    String title = data['title'];
-    int numEx = data['num_ex'];
-    int rest = data['rest'];
-    int duration = data['duration'];
-    Timer currentTime;
+    print('$temp');
+    if (title == "") {
+      title = data['title'];
+      numEx = data['num_ex'];
+      rest = data['rest'];
+      duration = data['duration'];
+      temp = duration;
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -54,7 +85,7 @@ class _TimerState extends State<TimerStart> {
             ),
             SizedBox(height: 200),
             Text(
-              duration.toString(),
+              temp.toString(),
               style: TextStyle(fontSize: 70, letterSpacing: 3),
             ),
           ],
@@ -66,7 +97,7 @@ class _TimerState extends State<TimerStart> {
           setState(() {
             isPaused = isPaused ? false : true;
           });
-          startTimer(currentTime, duration);
+          startTimer();
         },
         elevation: 5,
         child: Icon(isPaused ? Icons.play_arrow : Icons.pause),

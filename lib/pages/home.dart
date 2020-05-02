@@ -36,8 +36,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (data == null) data = {};
-    data = data.isNotEmpty ? data : ModalRoute.of(context).settings.arguments;
+    try {
+      data = data.isNotEmpty ? data : ModalRoute.of(context).settings.arguments;
+    } catch (e) {
+      print("Data is null");
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey[300],
       appBar: AppBar(
@@ -55,9 +59,9 @@ class _MyHomePageState extends State<MyHomePage> {
           backgroundColor: Colors.deepOrange[400],
           onPressed: () async {
             dynamic result = await Navigator.pushNamed(context, '/form');
+            print(result);
             if (result != null) {
               addToList(result);
-              print(result);
             } else {
               print("Nothing returned");
             }
@@ -86,6 +90,7 @@ class _ListviewState extends State<Listview> {
       itemBuilder: (BuildContext context, int index) {
         return GestureDetector(
           onLongPress: () {
+            //TODO EDIT WORKOUT FORM
             print('$index');
           },
           child: Container(
